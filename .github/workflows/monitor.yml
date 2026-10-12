@@ -2,7 +2,7 @@ name: Stablecoin Peg & Pool Monitor
 
 on:
   schedule:
-    # Runs at minute 0 of every hour
+    # Runs at minute 17 of every hour
     - cron: '17 * * * *'
   # Allows manual triggering from the GitHub Actions UI
   workflow_dispatch:
@@ -31,14 +31,13 @@ jobs:
       - name: Run Monitor Script
         run: python scripts/stablecoin_peg_pool_monitor.py
 
-      - name: Commit and Push Log Update
+      - name: Generate Risk Chart
+        run: python scripts/chart_history.py
+
+      - name: Commit and Push Telemetry Updates
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add peg_monitor_log.csv
-          if git diff --staged --quiet; then
-            echo "No log updates to commit."
-          else
-            git commit -m "chore(telemetry): record hourly peg & liquidity metrics [skip ci]"
-            git push origin HEAD:${{ github.ref_name }}
-          fi
+          git add peg_monitor_log.csv usde_risk_chart.png
+          git diff --staged --quiet || git commit -m "chore(telemetry): update peg metrics and risk chart [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
