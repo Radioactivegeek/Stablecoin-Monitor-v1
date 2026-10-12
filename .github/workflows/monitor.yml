@@ -3,7 +3,7 @@ name: Stablecoin Peg & Pool Monitor
 on:
   schedule:
     # Runs at minute 0 of every hour
-    - cron: '0 * * * *'
+    - cron: '17 * * * *'
   # Allows manual triggering from the GitHub Actions UI
   workflow_dispatch:
 
