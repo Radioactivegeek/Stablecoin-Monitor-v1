@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
 from pathlib import Path
 
-import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -23,7 +21,6 @@ def load_usde_history(csv_path: Path) -> pd.DataFrame:
     data = pd.read_csv(csv_path)
 
     required_columns = {
-        "Timestamp",
         "Asset",
         "Oracle Spread",
         "Pool Dominance",
@@ -34,16 +31,13 @@ def load_usde_history(csv_path: Path) -> pd.DataFrame:
         missing = ", ".join(sorted(missing_columns))
         raise ValueError(f"CSV is missing required columns: {missing}.")
 
-    data["Timestamp"] = pd.to_datetime(data["Timestamp"], errors="coerce")
     for column in ("Oracle Spread", "Pool Dominance"):
         data[column] = pd.to_numeric(
             data[column].astype("string").str.replace("%", "", regex=False),
             errors="coerce",
         )
 
-    data = data.dropna(
-        subset=["Timestamp", "Oracle Spread", "Pool Dominance"]
-    )
+    data = data.dropna(subset=["Oracle Spread", "Pool Dominance"])
     usde_data = data[data["Asset"] == "USDe"].copy()
     if usde_data.empty:
         return usde_data
@@ -56,7 +50,6 @@ def load_usde_history(csv_path: Path) -> pd.DataFrame:
 
     return (
         usde_data[usde_data["Pool Name"] == selected_pool]
-        .sort_values("Timestamp")
         .reset_index(drop=True)
     )
 
@@ -71,9 +64,10 @@ def plot_usde_history(data: pd.DataFrame, output_path: Path) -> None:
 
     sparse_data = len(data) <= 3
     marker_size = 60 if sparse_data else 28
+    x_values = range(1, len(data) + 1)
 
     spread_line = ax1.plot(
-        data["Timestamp"],
+        x_values,
         data["Oracle Spread"],
         color=ORACLE_COLOR,
         linewidth=2.0,
@@ -81,14 +75,14 @@ def plot_usde_history(data: pd.DataFrame, output_path: Path) -> None:
     )[0]
 
     ax1.fill_between(
-        data["Timestamp"],
+        x_values,
         data["Oracle Spread"],
         0,
         color=ORACLE_COLOR,
         alpha=0.08,
     )
     ax1.scatter(
-        data["Timestamp"],
+        x_values,
         data["Oracle Spread"],
         color=ORACLE_COLOR,
         edgecolors=FIGURE_BACKGROUND,
@@ -106,14 +100,14 @@ def plot_usde_history(data: pd.DataFrame, output_path: Path) -> None:
     )
 
     dominance_line = ax2.plot(
-        data["Timestamp"],
+        x_values,
         data["Pool Dominance"],
         color=DOMINANCE_COLOR,
         linewidth=2.0,
         label="Pool Dominance (%)",
     )[0]
     ax2.scatter(
-        data["Timestamp"],
+        x_values,
         data["Pool Dominance"],
         color=DOMINANCE_COLOR,
         edgecolors=FIGURE_BACKGROUND,
@@ -139,23 +133,13 @@ def plot_usde_history(data: pd.DataFrame, output_path: Path) -> None:
         fontweight="bold",
         pad=14,
     )
-    ax1.set_xlabel("Timestamp")
+    ax1.set_xlabel("Observation")
     ax1.set_ylabel("Oracle Spread (%)", color=ORACLE_COLOR)
     ax2.set_ylabel("Pool Dominance (%)", color=DOMINANCE_COLOR)
     ax1.tick_params(axis="y", labelcolor=ORACLE_COLOR)
     ax2.tick_params(axis="y", labelcolor=DOMINANCE_COLOR)
     ax1.grid(True, linestyle=":", color="#ffffff", alpha=0.15)
     ax2.grid(False)
-
-    if len(data) == 1:
-        timestamp = pd.Timestamp(data["Timestamp"].iloc[0])
-        ax1.set_xlim(
-            timestamp - timedelta(hours=6),
-            timestamp + timedelta(hours=6),
-        )
-
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M"))
-    fig.autofmt_xdate(rotation=45)
 
     ax1.text(
         0.99,
