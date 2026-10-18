@@ -139,7 +139,6 @@ def plot_usde_history(data: pd.DataFrame, output_path: Path) -> None:
         fontweight="bold",
         pad=14,
     )
-    ax1.set_xlabel("Timestamp")
     ax1.set_ylabel("Oracle Spread (%)", color=ORACLE_COLOR)
     ax2.set_ylabel("Pool Dominance (%)", color=DOMINANCE_COLOR)
     ax1.tick_params(axis="y", labelcolor=ORACLE_COLOR)
@@ -148,14 +147,14 @@ def plot_usde_history(data: pd.DataFrame, output_path: Path) -> None:
     ax2.grid(False)
 
     if len(data) == 1:
-        timestamp = pd.Timestamp(data["Timestamp"].iloc[0])
+        single_date = pd.Timestamp(data["Timestamp"].iloc[0])
         ax1.set_xlim(
-            timestamp - timedelta(hours=6),
-            timestamp + timedelta(hours=6),
+            single_date - timedelta(days=1),
+            single_date + timedelta(days=1),
         )
 
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M"))
-    fig.autofmt_xdate(rotation=45)
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
+    fig.autofmt_xdate(rotation=0, ha="center")
 
     ax1.text(
         0.99,
