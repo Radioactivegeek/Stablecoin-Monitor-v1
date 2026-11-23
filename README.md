@@ -53,7 +53,7 @@ After the Binance hot-wallet breach, traders rushed to exit USDe because Ethena 
 | **On-Chain Oracle** | $0.9994 avg | **$0.9944** (frozen ~18.5h) | Stuck below $0.9950 until heartbeat refreshed at 23:49 UTC |
 | **Oracle Spread** | 0.03% avg | **0.41%** (19:24 UTC) | Widened after spot recovered to $0.9985 while oracle lagged |
 
-![USDe Risk Telemetry — Oct 30 Shock](image.png)
+![USDe Risk Telemetry — Oct 30 Shock](./assets/oct30_binance_shock.png)
 
 ### How This Tool Prevents Losses
 * **Catches Bad Debt Early:** In the March 2026 Resolv (USR) hack, a stuck oracle let attackers borrow real USDC against worthless collateral. Tracking DEX pool skew and oracle spread together flags that exact gap before vaults get drained.
